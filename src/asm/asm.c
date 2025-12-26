@@ -9,9 +9,13 @@
 ASM_BushLeaf_PTR parse_expression(vector_ASM_Token *tokens, size_t *i) {
   ASM_BushLeaf_Instruction *out = NEW(ASM_BushLeaf_Instruction, {0});
 
-  out->name = copystr(tokens->at(*i).value);
+  out->name = copystr(tokens->at(++*i).value);
 
-  // todo parse args
+  out->arguments = MAKE_VECTOR(ASM_Petal_InstructionArgument);
+
+  while (1) {
+    // out->arguments.at(0)
+  }
 
   return out;
 }
