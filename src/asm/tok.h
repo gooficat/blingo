@@ -12,8 +12,8 @@ ENUM(ASM_TokType,
          ASM_TOK_PAREN_L = '(',
          ASM_TOK_PAREN_R = ')',
 
-         ASM_TOK_LITERAL,
-         ASM_TOK_IDENTIFIER,
+         ASM_TOK_LITERAL = '0',
+         ASM_TOK_IDENTIFIER = 'A',
 
          ASM_TOK_COLON = ':',
          ASM_TOK_SEMI = ';',
