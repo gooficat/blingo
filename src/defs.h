@@ -36,4 +36,19 @@
     }                                                                          \
   }
 
+#define NEW(type, ...)                                                         \
+  ({                                                                           \
+    type *placeholder = malloc(sizeof(type));                                  \
+    *placeholder = (type)__VA_ARGS__;                                          \
+    placeholder;                                                               \
+  });
+
 typedef char *STRING;
+
+#define copystr(s)                                                             \
+  ({                                                                           \
+    size_t l = strlen(s) + 1;                                                  \
+    STRING v = malloc(l);                                                      \
+    strcpy_s(v, l, s);                                                         \
+    v;                                                                         \
+  })

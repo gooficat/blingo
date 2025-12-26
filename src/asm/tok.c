@@ -59,7 +59,5 @@ vector_ASM_Token FetchTokens(const STRING file_path) {
 
     PUSH(tokens, token);
   }
-  token.type = ASM_TOK_EOF;
-  PUSH(tokens, token);
   return tokens;
 }

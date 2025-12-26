@@ -22,7 +22,7 @@ cmake_minimum_required(VERSION 3.15)
     if(MSVC)
         target_compile_options(blingo PRIVATE /W4)
     else()
-        target_compile_options(blingo PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(blingo PRIVATE -Wall -Wextra -Wpedantic -Wno-gnu-statement -Wno-incompatible-pointer-types -Wno-gnu-statement-expression-from-macro-expansion)
     endif()
     
     # Debug configuration
