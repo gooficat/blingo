@@ -38,7 +38,7 @@ vector_ASM_Token FetchTokens(const STRING file_path) {
   int tok_length = 0;
   int C = fgetc(file);
   while (C != EOF) {
-    if (isspace(C) && C != '\n') {
+    if (isspace(C)) { // && C != '\n') {
       C = fgetc(file);
       continue;
     }

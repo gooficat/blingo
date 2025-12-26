@@ -22,7 +22,8 @@
   {                                                                            \
     if (++(vec).size > (vec).capacity) {                                       \
       (vec).capacity *= 2;                                                     \
-      (vec).data = realloc((vec).data, (vec).capacity * sizeof(val));          \
+      (vec).data =                                                             \
+          realloc((vec).data, (vec).capacity * sizeof((vec).data[0]));         \
     }                                                                          \
     (vec).data[(vec).size - 1] = val;                                          \
   }
@@ -32,7 +33,8 @@
     --(vec).size;                                                              \
     if ((vec).capacity / 2 > (vec).size) {                                     \
       (vec).capacity /= 2;                                                     \
-      (vec).data = realloc((vec).data, (vec).capacity * sizeof(val));          \
+      (vec).data =                                                             \
+          realloc((vec).data, (vec).capacity * sizeof((vec).data[0]));         \
     }                                                                          \
   }
 
@@ -52,3 +54,10 @@ typedef char *STRING;
     strcpy_s(v, l, s);                                                         \
     v;                                                                         \
   })
+
+#define ullfromstr(s)                                                          \
+  strtoull(s, ({                                                               \
+             STRING t = (s) + strlen(s) - 1;                                   \
+             &t;                                                               \
+           }),                                                                 \
+           10)

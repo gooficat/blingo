@@ -50,3 +50,11 @@ typedef ASM_BushLeaf *ASM_BushLeaf_PTR;
 VECTOR_TYPE(ASM_BushLeaf_PTR);
 
 vector_ASM_BushLeaf_PTR GenerateAsmBush(vector_ASM_Token *tokens);
+
+void PrintBushI(vector_ASM_BushLeaf_PTR *bush, size_t *i);
+
+#define PrintBush(bush)                                                        \
+  {                                                                            \
+    size_t i = 0;                                                              \
+    PrintBushI(&bush, &i);                                                     \
+  }

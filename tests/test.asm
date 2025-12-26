@@ -1,2 +1,3 @@
 main:
-    mov ax, $32
+    mov ax, bx
+    push [67+32]
