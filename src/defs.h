@@ -20,11 +20,11 @@
 
 #define PUSH(vec, val)                                                         \
   {                                                                            \
-    if ((vec).size > (vec).capacity) {                                         \
+    if (++(vec).size > (vec).capacity) {                                       \
       (vec).capacity *= 2;                                                     \
       (vec).data = realloc((vec).data, (vec).capacity * sizeof(val));          \
     }                                                                          \
-    (vec).data[(vec).size++] = val;                                            \
+    (vec).data[(vec).size - 1] = val;                                          \
   }
 #define at(i) data[i]
 #define POP(vec)                                                               \

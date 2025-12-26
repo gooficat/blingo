@@ -42,12 +42,18 @@ vector_ASM_Token FetchTokens(const STRING file_path) {
       C = fgetc(file);
       continue;
     }
-    tok_length = 0;
-    do {
-      tok_buffer[tok_length++] = C;
+    if (isalnum(C)) {
+      tok_length = 0;
+      do {
+        tok_buffer[tok_length++] = C;
+        C = fgetc(file);
+      } while (isalnum(C));
+      tok_buffer[tok_length] = 0;
+    } else {
+      tok_buffer[0] = C;
+      tok_length = 1;
       C = fgetc(file);
-    } while (isalnum(C));
-    tok_buffer[tok_length] = 0;
+    }
 
     token = ParseToken(tok_buffer, tok_length);
 
