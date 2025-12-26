@@ -1,5 +1,6 @@
 #include "main.h"
 #include "asm/asm.h"
+#include "asm/encode.h"
 #include "asm/tok.h"
 #include <stdio.h>
 int main(void) {
@@ -12,7 +13,13 @@ int main(void) {
       printf("%s\n", tokens.at(i).value);
   }
 
-  vector_ASM_BushLeaf_PTR bush = GenerateAsmBush(&tokens);
+  ASM_Bush bush = GenerateAsmBush(&tokens);
+
+  vector_uint8_t bytes = AssembleBush(&bush);
+
+  FILE *f;
+  fopen_s(&f, "../tests/test.bin", "rt");
+  fwrite(bytes.data, 1, bytes.size, f);
 
   PrintBush(bush);
 

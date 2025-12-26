@@ -17,7 +17,8 @@ ASM_Petal_InstructionArgument parse_imm(vector_ASM_Token *tokens, size_t *i) {
   return arg;
 }
 
-ASM_Petal_InstructionArgument parse_alpha(vector_ASM_Token *tokens, size_t *i) {
+ASM_Petal_InstructionArgument parse_alpha(vector_ASM_Token *tokens, size_t *i,
+                                          ASM_Bush *bush) {
   ASM_Petal_InstructionArgument arg = {0};
 
   ASM_Register *reg = find_register(tokens->at(*i).value);
@@ -26,7 +27,9 @@ ASM_Petal_InstructionArgument parse_alpha(vector_ASM_Token *tokens, size_t *i) {
     arg.value = reg->opcode;
   } else {
     arg.type = ASM_ARGUMENT_LABEL;
+    arg.value = find_label(tokens->at(*i).value, bush);
     printf("label %s\n", tokens->at(*i).value);
+
     // todo: put the label value on the operand. search the current working unit
     // for label match
   }
@@ -34,7 +37,8 @@ ASM_Petal_InstructionArgument parse_alpha(vector_ASM_Token *tokens, size_t *i) {
   return arg;
 }
 
-ASM_Petal_InstructionArgument parse_indir(vector_ASM_Token *tokens, size_t *i) {
+ASM_Petal_InstructionArgument parse_indir(vector_ASM_Token *tokens, size_t *i,
+                                          ASM_Bush *bush) {
   ASM_Petal_InstructionArgument arg = {0};
   arg.indirect = true;
   ASM_Petal_InstructionArgument *current = &arg;
@@ -65,7 +69,8 @@ ASM_Petal_InstructionArgument parse_indir(vector_ASM_Token *tokens, size_t *i) {
   return arg;
 }
 
-ASM_BushLeaf_PTR parse_expression(vector_ASM_Token *tokens, size_t *i_) {
+ASM_BushLeaf_PTR parse_expression(vector_ASM_Token *tokens, size_t *i_,
+                                  ASM_Bush *bush) {
   ASM_BushLeaf_Instruction *out = NEW(ASM_BushLeaf_Instruction, {0});
   size_t i = *i_;
   out->base.type = ASM_LEAF_INSTRUCTION;
@@ -85,10 +90,10 @@ ASM_BushLeaf_PTR parse_expression(vector_ASM_Token *tokens, size_t *i_) {
       PUSH(out->arguments, parse_imm(tokens, &i));
       break;
     case ASM_TOK_SQUARE_L:
-      PUSH(out->arguments, parse_indir(tokens, &i));
+      PUSH(out->arguments, parse_indir(tokens, &i, bush));
       break;
     case ASM_TOK_IDENTIFIER:
-      PUSH(out->arguments, parse_alpha(tokens, &i));
+      PUSH(out->arguments, parse_alpha(tokens, &i, bush));
       break;
     default: {
       printf("of type %c", tokens->at(i).type);
@@ -110,8 +115,10 @@ breakout:;
   return out;
 }
 
-vector_ASM_BushLeaf_PTR GenerateAsmBush(vector_ASM_Token *tokens) {
-  vector_ASM_BushLeaf_PTR out = MAKE_VECTOR(ASM_BushLeaf_PTR);
+ASM_Bush GenerateAsmBush(vector_ASM_Token *tokens) {
+  ASM_Bush out;
+  out.labels = MAKE_VECTOR(ASM_Label);
+  out.leaves = MAKE_VECTOR(ASM_BushLeaf_PTR);
 
   size_t i = 0;
   while (i < tokens->size) {
@@ -119,16 +126,19 @@ vector_ASM_BushLeaf_PTR GenerateAsmBush(vector_ASM_Token *tokens) {
     switch (tokens->at(i).type) {
     case ASM_TOK_IDENTIFIER:
       if (tokens->at(i + 1).type == ASM_TOK_COLON) {
-        leaf = NEW( //
+        ASM_BushLeaf_Label *label_leaf = NEW( //
             ASM_BushLeaf_Label,
             {
                 .base = {ASM_LEAF_LABEL},
                 .name = copystr(tokens->at(i).value),
             } //
         );
+        leaf = label_leaf;
+        ASM_Label label = {label_leaf->name, 0}; // no offset yet
+        PUSH(out.labels, label);
         i += 2;
       } else {
-        leaf = parse_expression(tokens, &i);
+        leaf = parse_expression(tokens, &i, &out);
       }
       break;
     case ASM_TOK_EOL:
@@ -138,19 +148,19 @@ vector_ASM_BushLeaf_PTR GenerateAsmBush(vector_ASM_Token *tokens) {
               tokens->at(i).type, i);
       exit(EXIT_FAILURE);
     }
-    PUSH(out, leaf);
+    PUSH(out.leaves, leaf);
   }
 
   return out;
 }
 
-void PrintBushI(vector_ASM_BushLeaf_PTR *bush, size_t *i_i) {
+void PrintBushI(ASM_Bush *bush, size_t *i_i) {
   size_t i = *i_i;
-  for (i = 0; i != bush->size; ++i) {
-    switch (bush->at(i)->type) {
+  for (i = 0; i != bush->leaves.size; ++i) {
+    switch (bush->leaves.at(i)->type) {
     case ASM_LEAF_INSTRUCTION: {
       ASM_BushLeaf_Instruction *instruction =
-          (ASM_BushLeaf_Instruction *)bush->at(i);
+          (ASM_BushLeaf_Instruction *)bush->leaves.at(i);
       printf("instruction: '%s' with %llu args:\n", instruction->name,
              instruction->arguments.size);
       for (uint8_t i = 0; i < instruction->arguments.size; i++) {
@@ -159,13 +169,19 @@ void PrintBushI(vector_ASM_BushLeaf_PTR *bush, size_t *i_i) {
       }
     } break;
     case ASM_LEAF_LABEL: {
-      ASM_BushLeaf_Label *label = (ASM_BushLeaf_Label *)bush->at(i);
+      ASM_BushLeaf_Label *label = (ASM_BushLeaf_Label *)bush->leaves.at(i);
       printf("label: %s\n", label->name);
     } break;
     case ASM_LEAF_DIRECTIVE:
       break;
     }
   }
-out:;
   *i_i = i;
+}
+
+size_t find_label(const char *name, ASM_Bush *bush) {
+  for (size_t i = 0; i != bush->labels.size; ++i)
+    if (!strcmp(bush->labels.at(i).name, name))
+      return i;
+  return 0;
 }

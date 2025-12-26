@@ -34,3 +34,6 @@ extern const ASM_Register REGISTERS[];
 
 ASM_Register *find_register(const char *name);
 ASM_Instruction *find_instruction_name_only(const char *name);
+
+extern const uint8_t NUM_REGISTERS;
+extern const uint16_t NUM_INSTRUCTIONS;

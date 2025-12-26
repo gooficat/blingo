@@ -27,7 +27,9 @@
     }                                                                          \
     (vec).data[(vec).size - 1] = val;                                          \
   }
+
 #define at(i) data[i]
+
 #define POP(vec)                                                               \
   {                                                                            \
     --(vec).size;                                                              \
